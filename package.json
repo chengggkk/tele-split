@@ -11,7 +11,11 @@
   "dependencies": {
     "@dynamic-labs/ethereum": "^3.1.0",
     "@dynamic-labs/sdk-react-core": "^3.1.0",
+<<<<<<< HEAD
     "mongoose": "^8.6.3",
+=======
+    "@twa-dev/sdk": "^7.10.1",
+>>>>>>> origin
     "next": "14.2.13",
     "react": "^18",
     "react-dom": "^18"
