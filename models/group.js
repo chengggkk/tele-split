@@ -1,12 +1,8 @@
 
 import mongoose from 'mongoose';
 
-const sharelinkSchema = new mongoose.Schema({
+const groupSchema = new mongoose.Schema({
     groupname: {
-        type: String,
-        required: true
-    },
-    members: {
         type: String,
         required: true
     },
@@ -17,6 +13,6 @@ const sharelinkSchema = new mongoose.Schema({
     }
 });
 
-const sharelink = mongoose.model('sharelink', sharelinkSchema);
+const group = mongoose.model('group', groupSchema);
 
-export default sharelink; // Ensure this line is present to export the userlink model as default
+export default group; // Ensure this line is present to export the userlink model as default
