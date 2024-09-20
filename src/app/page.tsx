@@ -3,6 +3,7 @@ import Wallet from "./components/Wallet";
 import dynamic from 'next/dynamic'
 
 const TelegramUser = dynamic(() => import('./components/TelegramUser'), { ssr: false })
+const ShareButton = dynamic(() => import('./components/ShareButton'), { ssr: false })
 
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <Wallet />
         <TelegramUser />
+        <ShareButton />
         <Image
           className="dark:invert"
           src="https://nextjs.org/icons/next.svg"
