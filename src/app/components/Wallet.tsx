@@ -50,42 +50,8 @@ const evmNetworks = [
             symbol: "ETH",
         },
         networkId: 1,
-
-        rpcUrls: ["https://mainnet.infura.io/v3/"],
+        rpcUrls: ["https://eth.llamarpc.com	"],
         vanityName: "ETH Mainnet",
-    },
-    {
-        blockExplorerUrls: ["https://etherscan.io/"],
-        chainId: 5,
-        chainName: "Ethereum Goerli",
-        iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
-        name: "Ethereum",
-        nativeCurrency: {
-            decimals: 18,
-            name: "Ether",
-            symbol: "ETH",
-        },
-        networkId: 5,
-        rpcUrls: [
-            "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-        ],
-
-        vanityName: "Goerli",
-    },
-    {
-        blockExplorerUrls: ["https://polygonscan.com/"],
-        chainId: 137,
-        chainName: "Matic Mainnet",
-        iconUrls: ["https://app.dynamic.xyz/assets/networks/polygon.svg"],
-        name: "Polygon",
-        nativeCurrency: {
-            decimals: 18,
-            name: "MATIC",
-            symbol: "MATIC",
-        },
-        networkId: 137,
-        rpcUrls: ["https://polygon-rpc.com"],
-        vanityName: "Polygon",
     },
 ];
 
