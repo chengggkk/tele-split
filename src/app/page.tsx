@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Wallet from "./components/Wallet";
-import TelegramUser from "./components/TelegramUser";
+import dynamic from 'next/dynamic'
+
+const TelegramUser = dynamic(() => import('./components/TelegramUser'), { ssr: false })
+
 
 export default function Home() {
   return (
