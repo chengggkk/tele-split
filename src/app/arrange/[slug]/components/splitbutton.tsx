@@ -2,7 +2,9 @@ import { useState } from 'react';
 
 const SplitButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tourName, setTourName] = useState('');
+  const [tourName, setTourName] = useState('');  // State for "average" form
+  const [splitName, setSplitName] = useState(''); // State for "customize" form
+  const [amount, setAmount] = useState('');      // State for "customize" form
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeForm, setActiveForm] = useState<'average' | 'customize'>('average');
 
@@ -13,24 +15,40 @@ const SplitButton = () => {
 
   const closeModal = () => setIsModalOpen(false);
 
+  // Handlers for input changes
   const handleTourNameChange = (e: { target: { value: string } }) => {
     setTourName(e.target.value);
     setSuccessMessage(null);  // Clear any messages when input changes
   };
 
+  const handleSplitNameChange = (e: { target: { value: string } }) => {
+    setSplitName(e.target.value);
+    setSuccessMessage(null);  // Clear any messages when input changes
+  };
+
+  const handleAmountChange = (e: { target: { value: string } }) => {
+    setAmount(e.target.value);
+    setSuccessMessage(null);  // Clear any messages when input changes
+  };
+
   const handleSubmit = () => {
-    // Handle form submission
+    // Handle form submission logic based on active form
+    if (activeForm === 'average') {
+      console.log(`Tour Name: ${tourName}`);
+    } else if (activeForm === 'customize') {
+      console.log(`Split Name: ${splitName}, Amount: ${amount}`);
+    }
     setSuccessMessage('Form submitted successfully!');
   };
 
   return (
     <>
-      <a
+      <button
         className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
         onClick={openModal}
       >
-        create a split
-      </a>
+        Create a Split
+      </button>
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -41,15 +59,17 @@ const SplitButton = () => {
                 className={`px-3 py-1 rounded ${activeForm === 'average' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
                 onClick={() => setActiveForm('average')}
               >
-                average
+                Average
               </button>
               <button
                 className={`px-3 py-1 rounded ${activeForm === 'customize' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
                 onClick={() => setActiveForm('customize')}
               >
-                customize
+                Customize
               </button>
             </div>
+
+            {/* Form for "average" */}
             {activeForm === 'average' && (
               <div>
                 <input
@@ -59,6 +79,26 @@ const SplitButton = () => {
                   placeholder="Enter split name"
                   className="border p-2 rounded w-full mb-4"
                 />
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  placeholder="Enter amount"
+                  className="border p-2 rounded w-full mb-4"
+                />
+
+                <table className="w-full">
+                        <tr>
+                            <td>John Doe</td>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                        </tr>
+                        <tr>
+                            <td>Mike Johnson</td>
+                        </tr>
+                </table>
+                
                 <div className="flex justify-end">
                   <button
                     className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
@@ -75,13 +115,22 @@ const SplitButton = () => {
                 </div>
               </div>
             )}
+
+            {/* Form for "customize" */}
             {activeForm === 'customize' && (
               <div>
                 <input
                   type="text"
-                  value={tourName}
-                  onChange={handleTourNameChange}
-                  placeholder="Enter another split name"
+                  value={splitName}
+                  onChange={handleSplitNameChange}
+                  placeholder="Enter split name"
+                  className="border p-2 rounded w-full mb-4"
+                />
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  placeholder="Enter amount"
                   className="border p-2 rounded w-full mb-4"
                 />
                 <div className="flex justify-end">
