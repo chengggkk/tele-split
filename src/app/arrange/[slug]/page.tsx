@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 // import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SplitButton from "./components/splitbutton";
+import GroupUsers from "@/app/components/GroupUsers";
 
 const TelegramUser = dynamic(() => import("../../components/TelegramUser"), {
     ssr: false,
@@ -44,7 +45,7 @@ export default function Home({ params }: { params: { slug: string } }) {
                     <h1>Arrange Page</h1>
                     <p>Group Name: {groupname}</p>
                 </div>
-                <TelegramUser />
+                <GroupUsers params={params} />
                 <ShareButton params={params} />
                 <SplitButton />
             </main>

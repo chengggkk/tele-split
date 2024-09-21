@@ -13,6 +13,22 @@ const groupmemberSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    userName: {
+        type: String,
+        required: false,
+    },
+    firstName: {
+        type: String,
+        required: false,
+    },
+    lastName: {
+        type: String,
+        required: false,
+    },
+    photoUrl: {
+        type: String,
+        required: false,
+    },
     address: {
         type: String,
         required: true,
