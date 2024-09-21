@@ -50,7 +50,7 @@ export default function Home({ params }: { params: { slug: string } }) {
                 </div>
                 <GroupUsers params={params} />
                 <ShareButton params={params} />
-                <SplitButton />
+                <SplitButton params={params} />
             </main>
         </div>
     );

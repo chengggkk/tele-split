@@ -1,0 +1,17 @@
+.container {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+  }
+  
+  .checkboxContainer {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+  }
+  
+  .left, .right {
+    width: 45%;
+  }
+
+  

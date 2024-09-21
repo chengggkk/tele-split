@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Wallet from "./components/Wallet";
+
+// const ShareButton = dynamic(() => import('./arrange/[slug]/components/ShareButton'), { ssr: false })
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
 
