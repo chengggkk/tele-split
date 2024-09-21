@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 const TelegramUser = dynamic(() => import("./components/TelegramUser"), {
     ssr: false,
 });
+const GroupList = dynamic(() => import("./components/GroupList"), {
+    ssr: false,
+});
 const JoinGroup = dynamic(() => import("./components/JoinGroup"), {
     ssr: false,
 });
@@ -21,6 +24,7 @@ export default function Home() {
             <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
                 <Wallet />
                 <TelegramWallet />
+                <GroupList />
                 <JoinGroup />
                 {/* <TelegramUser /> */}
                 {/* <ShareButton /> */}

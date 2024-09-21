@@ -28,6 +28,6 @@ const sharelinkSchema = new mongoose.Schema({
     },
 });
 
-const sharelink = mongoose.model("sharelink", sharelinkSchema);
+const sharelink = mongoose.models.sharelink || mongoose.model("sharelink", sharelinkSchema);
 
 export default sharelink; // Ensure this line is present to export the userlink model as default

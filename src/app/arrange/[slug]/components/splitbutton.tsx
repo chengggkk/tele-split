@@ -1,110 +1,263 @@
 import { useState } from 'react';
+import styles from '../styles/splitbutton.module.css';
+import WebApp from "@twa-dev/sdk";
 
-const SplitButton = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tourName, setTourName] = useState('');
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [activeForm, setActiveForm] = useState<'average' | 'customize'>('average');
+function SplitButton({ params }: { params: { slug: string } }) {
+    const { slug } = params;
+    const [startParams, setStartParams] = useState<string>("undefined");
+    const [selected, setSelected] = useState<string[]>([]);
+    const [amounts, setAmounts] = useState<{ [key: string]: string }>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [splitNote, setSplitNote] = useState(''); 
+    const [amount, setAmount] = useState('');      
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [activeForm, setActiveForm] = useState<'average' | 'customize'>('average');
+    const ID = WebApp.initDataUnsafe.user?.id || 'Unknown ID';
 
-  const openModal = () => {
-    setSuccessMessage(null);  // Clear any previous messages when opening the modal
-    setIsModalOpen(true);
-  };
+    const openModal = () => {
+        setSuccessMessage(null);  
+        setIsModalOpen(true);
+    };
 
-  const closeModal = () => setIsModalOpen(false);
+    const closeModal = () => setIsModalOpen(false);
 
-  const handleTourNameChange = (e: { target: { value: string } }) => {
-    setTourName(e.target.value);
-    setSuccessMessage(null);  // Clear any messages when input changes
-  };
+    const handleSplitNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSplitNote(e.target.value);
+        setSuccessMessage(null);  
+    };
 
-  const handleSubmit = () => {
-    // Handle form submission
-    setSuccessMessage('Form submitted successfully!');
-  };
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(e.target.value);
+        setSuccessMessage(null);  
+    };
 
-  return (
-    <>
-      <a
-        className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-        onClick={openModal}
-      >
-        create a split
-      </a>
+    const handleSubmit = async () => {
+        try {
+            const response: Response = await fetch('/api/split', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    Payer: ID,
+                    Note: splitNote,
+                    groupID: slug,
+                }),
+            });
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Create Split</h2>
-            <div className="flex justify-between mb-4">
-              <button
-                className={`px-3 py-1 rounded ${activeForm === 'average' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
-                onClick={() => setActiveForm('average')}
-              >
-                average
-              </button>
-              <button
-                className={`px-3 py-1 rounded ${activeForm === 'customize' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
-                onClick={() => setActiveForm('customize')}
-              >
-                customize
-              </button>
-            </div>
-            {activeForm === 'average' && (
-              <div>
-                <input
-                  type="text"
-                  value={tourName}
-                  onChange={handleTourNameChange}
-                  placeholder="Enter split name"
-                  className="border p-2 rounded w-full mb-4"
-                />
-                <div className="flex justify-end">
-                  <button
-                    className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                    onClick={handleSubmit}
-                  >
-                    Save
-                  </button>
+            if (!response.ok) throw new Error('Failed to save the split.');
+            const result = await response.json();
+
+            // Handle both "average" and "customize" split
+        selected.forEach(async (member) => {
+            let memberAmount = 0;
+
+            if (activeForm === 'average') {
+                // Calculate average amount for each selected member
+                memberAmount = Number(amount) / selected.length;
+            } else if (activeForm === 'customize') {
+                // Get custom amount for each member
+                memberAmount = amounts[member] ? Number(amounts[member]) : 0;
+            }
+
+            // Post each split member and amount
+            await fetch('/api/splitmember', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    split_id: result._id,
+                    split_member: member,
+                    amount: memberAmount,
+                }),
+            });
+        });
+    
+
+            setSuccessMessage('Form submitted successfully!');
+            closeModal();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const allOptions = ["Option 1", "Option 2", "Option 3", "Option 4"];
+
+    const handleCheckboxChange = (option: string) => {
+        setSelected((prevSelected) => {
+            const newSelected = prevSelected.includes(option)
+                ? prevSelected.filter((item) => item !== option)
+                : [...prevSelected, option];
+            if (!prevSelected.includes(option)) {
+                setAmounts((prevAmounts) => ({
+                    ...prevAmounts,
+                    [option]: '', 
+                }));
+            } else {
+                const { [option]: removed, ...rest } = amounts;
+                setAmounts(rest);
+            }
+            return newSelected;
+        });
+    };
+
+    return (
+        <>
+            <button
+                className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                onClick={openModal}
+            >
+                Create a Split
+            </button>
+
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg" style={{ width: '90%' }}>
+                        <h2 className="text-lg font-bold mb-4">Create Split</h2>
+                        <div className="flex justify-between mb-4">
+                            <button
+                                className={`px-3 py-1 rounded ${activeForm === 'average' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
+                                onClick={() => setActiveForm('average')}
+                            >
+                                Average
+                            </button>
+                            <button
+                                className={`px-3 py-1 rounded ${activeForm === 'customize' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
+                                onClick={() => setActiveForm('customize')}
+                            >
+                                Customize
+                            </button>
+                        </div>
+
+                        {activeForm === 'average' && (
+                            <div>
+                                <input
+                                    type="text"
+                                    value={splitNote}
+                                    onChange={handleSplitNoteChange}
+                                    placeholder="Enter split note"
+                                    className="border p-2 rounded w-full mb-4 text-black"
+                                />
+                                <input
+                                    type="text"
+                                    value={amount}
+                                    onChange={handleAmountChange}
+                                    placeholder="Enter amount"
+                                    className="border p-2 rounded w-full mb-4 text-black"
+                                />
+
+                                <div className={styles.container}>
+                                    <div className={styles.checkboxContainer}>
+                                        <div className={styles.left}>
+                                            <h3>All Options</h3>
+                                            {allOptions.map((option) => (
+                                                <div key={option}>
+                                                    <input
+                                                        type="checkbox"
+                                                        id={option}
+                                                        value={option}
+                                                        checked={selected.includes(option)}
+                                                        onChange={() => handleCheckboxChange(option)}
+                                                    />
+                                                    <label htmlFor={option}>{option}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className={styles.right}>
+                                            <h3>Selected Options</h3>
+                                            <ul>
+                                                {selected.map((option) => (
+                                                    <li key={option}>{option}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end">
+                                    <button
+                                        className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
+                                        onClick={closeModal}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                                        onClick={handleSubmit}
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeForm === 'customize' && (
+                            <div>
+                                <input
+                                    type="text"
+                                    value={splitNote}
+                                    onChange={handleSplitNoteChange}
+                                    placeholder="Enter split note"
+                                    className="border p-2 rounded w-full mb-4 text-black"
+                                />
+                                <div className={styles.container}>
+                                    <div className={styles.checkboxContainer}>
+                                        <div className={styles.left}>
+                                            <h3>All Options</h3>
+                                            {allOptions.map((option) => (
+                                                <div key={option}>
+                                                    <input
+                                                        type="checkbox"
+                                                        id={option}
+                                                        value={option}
+                                                        checked={selected.includes(option)}
+                                                        onChange={() => handleCheckboxChange(option)}
+                                                    />
+                                                    <label htmlFor={option}>{option}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className={styles.right}>
+                                            <h3>Selected Options</h3>
+                                            <ul>
+                                                {selected.map((option) => (
+                                                    <li key={option}>
+                                                        {option}
+                                                        <input
+                                                            type="text"
+                                                            value={amounts[option] || ''}
+                                                            onChange={(e) => setAmounts({ ...amounts, [option]: e.target.value })}
+                                                            placeholder="Enter amount"
+                                                            className="border p-2 rounded w-full mb-4"
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end mt-5">
+                                    <button
+                                        className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
+                                        onClick={closeModal}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                                        onClick={handleSubmit}
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-              </div>
             )}
-            {activeForm === 'customize' && (
-              <div>
-                <input
-                  type="text"
-                  value={tourName}
-                  onChange={handleTourNameChange}
-                  placeholder="Enter another split name"
-                  className="border p-2 rounded w-full mb-4"
-                />
-                <div className="flex justify-end">
-                  <button
-                    className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                    onClick={handleSubmit}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+        </>
+    );
+}
 
 export default SplitButton;
