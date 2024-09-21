@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Wallet from "./components/Wallet";
 import dynamic from 'next/dynamic'
+import TourComponent from "./components/creategroup";
 
 const TelegramUser = dynamic(() => import('./components/TelegramUser'), { ssr: false })
 const ShareButton = dynamic(() => import('./components/ShareButton'), { ssr: false })
@@ -13,6 +14,7 @@ export default function Home() {
         <Wallet />
         <TelegramUser />
         <ShareButton />
+        <TourComponent />
         <Image
           className="dark:invert"
           src="https://nextjs.org/icons/next.svg"
