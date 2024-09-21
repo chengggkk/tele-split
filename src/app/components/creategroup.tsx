@@ -117,7 +117,7 @@ const TourComponent = () => {
         <div>
             {/* Button to open modal */}
             <button
-                className="rounded-full bg-black/[.08] dark:bg-white/[.06] px-2 py-1"
+                className="border rounded-full bg-black/[.08] dark:bg-white/[.06] px-2 py-1"
                 onClick={openModal}
             >
                 Create Tour
