@@ -3,6 +3,7 @@ import {
     DynamicWidget,
 } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import Pay from "./Pay";
 
 // Setting up list of evmNetworks
 const evmNetworks = [
@@ -64,6 +65,7 @@ const Wallet = () => (
         }}
     >
         <DynamicWidget />
+        <Pay />
     </DynamicContextProvider>
 );
 

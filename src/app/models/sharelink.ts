@@ -1,32 +1,31 @@
-
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const sharelinkSchema = new mongoose.Schema({
     sender: {
         type: String,
-        required: true
+        required: true,
     },
     sharelink: {
         type: String,
-        required: true
+        required: true,
     },
     groupID: {
         type: String,
-        required: true
+        required: true,
     },
     generateTIME: {
         type: Date,
         required: true,
-        default: Date.now
+        default: Date.now,
     },
     groupname: {
         type: String,
-        required: true
+        required: true,
     },
     receiver: {
         type: String,
-        required: false
-    }
+        required: false,
+    },
 });
 
 const sharelink = mongoose.models.sharelink || mongoose.model('sharelink', sharelinkSchema);
