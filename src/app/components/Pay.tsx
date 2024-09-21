@@ -37,12 +37,13 @@ const Pay = () => {
         const address = formData.get("address") as string;
         const amount = formData.get("amount") as string;
 
-        const publicClient = await primaryWallet.getPublicClient();
+        // const publicClient = await primaryWallet.getPublicClient();
         const walletClient = await primaryWallet.getWalletClient();
 
         const transaction = {
             to: address as `0x${string}`,
             value: amount ? parseEther(amount) : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             chain: customNetwork as any,
         };
         console.log(JSON.stringify(mainnet));
