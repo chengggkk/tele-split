@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import SplitButton from './components/splitbutton';
 
 const TelegramUser = dynamic(() => import('../../components/TelegramUser'), { ssr: false });
-const ShareButton = dynamic(() => import('../../components/ShareButton'), { ssr: false });
+const ShareButton = dynamic(() => import('./components/ShareButton'), { ssr: false });
 
 export default function Home({ params }: { params: { slug: string } }) {
   const [groupname, setGroupname] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function Home({ params }: { params: { slug: string } }) {
           <p>Group Name: {groupname}</p>
         </div>
         <TelegramUser />
-        <ShareButton />
+        <ShareButton params={params}/>
         <SplitButton />
       </main>
     </div>

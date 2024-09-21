@@ -16,6 +16,6 @@ const groupmemberSchema = new mongoose.Schema({
     }
 });
 
-const groupmember = mongoose.models.group || mongoose.model('groupmember', groupmemberSchema);
+const groupmember = mongoose.models.groupmember || mongoose.model('groupmember', groupmemberSchema);
 
 export default groupmember; // Ensure this line is present to export the userlink model as default

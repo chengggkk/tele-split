@@ -8,7 +8,7 @@ const TourComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tourName, setTourName] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);  // State to show success/failure message
-  const id = WebApp.initDataUnsafe.user?.id || 'Unknown ID';
+  const id = WebApp.initDataUnsafe.user?.id || 'Unknown ID';  // Get the user ID from the WebApp context
 
 
   const openModal = () => {
@@ -75,7 +75,7 @@ const TourComponent = () => {
     }
 
     // Direct to arrange page
-    // window.location.href = '/arrange/' + result._id; // Use the _id from the response
+    window.location.href = '/arrange/' + result._id; // Use the _id from the response
     closeModal();     // Optionally close the modal on success
     } catch (error) {
       console.error('Error saving tour: ', error);
