@@ -1,22 +1,60 @@
 "use client";
-import { createWalletClient, http, parseEther } from "viem";
+import { createWalletClient, http, parseEther, Chain } from "viem";
 import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
+import { mainnet, sepolia, goerli } from "viem/chains";
 import { FormEventHandler, useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
+
+const networks: { [key: string]: Chain } = {
+    Mainnet: mainnet,
+    Sepolia: sepolia,
+    AirDAOTestnet: {
+        id: 22040,
+        name: "AirDAO testnet",
+        nativeCurrency: { name: "Ambrosus", symbol: "AMB", decimals: 18 },
+        rpcUrls: { default: { http: ["https://network.ambrosus-test.io"] } },
+        blockExplorers: {
+            default: {
+                name: "AirDAO Explorer",
+                url: "https://testnet.airdao.io/explorer",
+                apiUrl: "https://api.etherscan.io/api",
+            },
+        },
+    },
+    AirDAO: {
+        id: 16718,
+        name: "AirDAO mainnet",
+        nativeCurrency: { name: "Ambrosus", symbol: "AMB", decimals: 18 },
+        rpcUrls: { default: { http: ["https://network.ambrosus.io/"] } },
+        blockExplorers: {
+            default: {
+                name: "AirDAO Explorer",
+                url: "https://airdao.io/explorer",
+                apiUrl: "https://api.etherscan.io/api",
+            },
+        },
+    },
+};
 
 export default function TelegramWallet() {
     const [address, setAddress] = useState("");
     const [message, setMessage] = useState("");
+    const [balance, setBalance] = useState(0);
     const [mnemonic, setMnemonic] = useState("");
     const [copySuccess, setCopySuccess] = useState("");
     const [showMnemonicText, setShowMnemonicText] = useState(false);
     const [mnemonicCopySuccess, setMnemonicCopySuccess] = useState("");
+    const [selectedNetwork, setSelectedNetwork] = useState<Chain>(mainnet);
 
     function getAccount() {
+        const client = createWalletClient({
+            chain: selectedNetwork,
+            transport: http(),
+        });
         WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
             if (error) {
                 setMessage(JSON.stringify(error));
+                
                 return null;
             }
             if (result) {
@@ -81,7 +119,7 @@ export default function TelegramWallet() {
         const account = getAccount();
 
         const client = createWalletClient({
-            chain: mainnet,
+            chain: selectedNetwork,
             transport: http(),
         });
 
@@ -112,21 +150,41 @@ export default function TelegramWallet() {
         }
     };
 
+    const handleNetworkChange = (
+        event: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+        const networkName = event.target.value;
+        setSelectedNetwork(networks[networkName]);
+    };
+
     return (
         <div>
-            <div className="flex items-center space-x-2">
-                <span>Address: {formatAddress(address)}</span>
-                <button
-                    onClick={copyToClipboard}
-                    className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                    <span>Address: {formatAddress(address)}</span>
+                    <button
+                        onClick={copyToClipboard}
+                        className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    >
+                        Copy
+                    </button>
+                    {copySuccess && (
+                        <span className="text-green-500 text-sm">
+                            {copySuccess}
+                        </span>
+                    )}
+                </div>
+                <select
+                    value={selectedNetwork.name}
+                    onChange={handleNetworkChange}
+                    className="px-2 py-1 bg-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
                 >
-                    Copy
-                </button>
-                {copySuccess && (
-                    <span className="text-green-500 text-sm">
-                        {copySuccess}
-                    </span>
-                )}
+                    {Object.keys(networks).map((networkName) => (
+                        <option key={networkName} value={networkName}>
+                            {networkName}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="mt-4">
