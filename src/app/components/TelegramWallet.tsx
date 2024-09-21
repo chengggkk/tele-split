@@ -6,12 +6,41 @@ import {
     Chain,
     formatEther,
     createPublicClient,
+    encodeFunctionData,
+    parseUnits,
 } from "viem";
 import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
 import { mainnet, sepolia, goerli } from "viem/chains";
 import { defineChain } from "viem/utils";
 import { FormEventHandler, useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
+
+const USDC_ADDRESS = {
+    Ethereum: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    Sepolia: "0xd3f43c3cf86237ba743d24ceda0e56079364a431", // mock USDC on sepolia
+    "AirDAO testnet": "0x92EA66615Ba256cb073D27193efb524a1F880Be9",
+};
+
+// ABI for the transfer function of ERC-20 tokens (including USDC)
+const ERC20_ABI = [
+    {
+        constant: false,
+        inputs: [
+            { name: "_to", type: "address" },
+            { name: "_value", type: "uint256" },
+        ],
+        name: "transfer",
+        outputs: [{ name: "", type: "bool" }],
+        type: "function",
+    },
+    {
+        constant: true,
+        inputs: [{ name: "_owner", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "balance", type: "uint256" }],
+        type: "function",
+    },
+];
 
 const AirDAOTestnet = defineChain({
     id: 22040,
@@ -77,7 +106,7 @@ const networks: { [key: string]: Chain } = {
     Mainnet: mainnet,
     Sepolia: sepolia,
     AirDAOTestnet: AirDAOTestnet,
-    AirDAO: AirDAO,
+    // AirDAO: AirDAO,
 };
 
 export default function TelegramWallet() {
@@ -93,6 +122,7 @@ export default function TelegramWallet() {
     const [selectedNetwork, setSelectedNetwork] = useState<any>(mainnet);
     const [isLoading, setIsLoading] = useState(false);
     const [biometricInited, setBiometricInited] = useState(false);
+    const [isFormVisible, setIsFormVisible] = useState(false);
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -199,34 +229,67 @@ export default function TelegramWallet() {
         const address = formData.get("address") as string;
         const amount = formData.get("amount") as string;
 
-        WebApp.CloudStorage.getItem("mnemonic", async (error, result) => {
-            if (error) {
-                setMessage(JSON.stringify(error));
+        const biometricManager = WebApp.BiometricManager;
+        if (!biometricManager.isInited) {
+            alert("Biometric not initialized yet!");
+            return;
+        }
 
-                return null;
-            }
-            let account = undefined;
-            if (result) {
-                account = mnemonicToAccount(result);
-            } else {
-                const mnemonic = generateMnemonic(english);
-                account = mnemonicToAccount(mnemonic);
-                WebApp.CloudStorage.setItem("mnemonic", mnemonic);
-                setAddress(account.address);
-            }
-            const client = createWalletClient({
-                chain: selectedNetwork,
-                transport: http(),
-            });
+        biometricManager.authenticate(
+            { reason: "The bot requests biometrics for testing purposes." },
+            (success) => {
+                if (success) {
+                    WebApp.CloudStorage.getItem(
+                        "mnemonic",
+                        async (error, result) => {
+                            if (error) {
+                                setMessage(JSON.stringify(error));
 
-            const hash = await client.sendTransaction({
-                account: account as any,
-                to: address as `0x${string}`,
-                value: amount ? parseEther(amount) : undefined,
-                chain: selectedNetwork,
-            });
-            setTxnHash(hash);
-        });
+                                return null;
+                            }
+                            let account = undefined;
+                            if (result) {
+                                account = mnemonicToAccount(result);
+                            } else {
+                                const mnemonic = generateMnemonic(english);
+                                account = mnemonicToAccount(mnemonic);
+                                WebApp.CloudStorage.setItem(
+                                    "mnemonic",
+                                    mnemonic
+                                );
+                                setAddress(account.address);
+                            }
+                            const client = createWalletClient({
+                                chain: selectedNetwork,
+                                transport: http(),
+                            });
+
+                            // Parse amount (USDC uses 6 decimals, so use `parseUnits` for 6 decimals)
+                            const amountInUSDC = parseUnits(amount, 6); // amount in USDC (6 decimals)
+
+                            // Prepare the data for the transfer function
+                            const transferData = {
+                                abi: ERC20_ABI, // ABI of the contract
+                                functionName: "transfer", // Function to call on the USDC contract
+                                args: [address, amountInUSDC], // Parameters: recipient and amount
+                            };
+
+                            const hash = await client.sendTransaction({
+                                account: account as any,
+                                to: USDC_ADDRESS[
+                                    selectedNetwork.name as keyof typeof USDC_ADDRESS
+                                ] as `0x${string}`,
+                                data: encodeFunctionData(transferData),
+                                chain: selectedNetwork,
+                            });
+                            setTxnHash(hash);
+                        }
+                    );
+                } else {
+                    console.log("Authentication failed");
+                }
+            }
+        );
     };
 
     function toggleMnemonic() {
@@ -257,18 +320,35 @@ export default function TelegramWallet() {
     };
 
     const fetchBalance = async (address: string) => {
-        const publicClient = createPublicClient({
+        const client = createPublicClient({
             chain: selectedNetwork,
             transport: http(),
         });
-        const balance = await publicClient.getBalance({
-            address: address as `0x${string}`,
+        // const balance = await publicClient.getBalance({
+        //     address: address as `0x${string}`,
+        // });
+        const balance = await client.readContract({
+            address: USDC_ADDRESS[
+                selectedNetwork.name as keyof typeof USDC_ADDRESS
+            ] as `0x${string}`, // USDC contract address
+            abi: ERC20_ABI, // ERC-20 ABI
+            functionName: "balanceOf", // Function to call
+            args: [address], // Address to check balance for
         });
-        setBalance(Number(formatEther(balance)));
+        const balanceInUSDC = Number(balance) / 10 ** 6; // Convert balance from smallest unit to USDC
+        setBalance(balanceInUSDC);
+    };
+
+    const formatBalance = (balance: number) => {
+        return balance.toFixed(2);
     };
 
     const handleRefresh = () => {
         getAccount();
+    };
+
+    const toggleForm = () => {
+        setIsFormVisible(!isFormVisible);
     };
 
     return (
@@ -283,6 +363,7 @@ export default function TelegramWallet() {
                 <span className="text-sm opacity-80 ml-2 border-l border-white border-opacity-30 pl-2">
                     {formatAddress(address)}
                 </span>
+                <span>{formatBalance(balance)}</span>
             </button>
 
             {isModalOpen && (
@@ -375,6 +456,20 @@ export default function TelegramWallet() {
                         </div>
 
                         <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Balance
+                            </label>
+                            <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2">
+                                <div className="text-gray-800 dark:text-gray-200">
+                                    {formatBalance(balance)}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    USDC
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
                             <button
                                 onClick={toggleMnemonic}
                                 className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -408,8 +503,72 @@ export default function TelegramWallet() {
                         </div>
 
                         <button
+                            onClick={toggleForm}
+                            className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 mt-4"
+                        >
+                            {isFormVisible ? "Hide Send Form" : "Show Send Form"}
+                        </button>
+
+                        {isFormVisible && (
+                            <form
+                                onSubmit={async (event) => onSubmit(event)}
+                                className="mt-6 bg-gray-100 dark:bg-gray-700 p-4 rounded-lg"
+                            >
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                                    Send USDC
+                                </h3>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="address"
+                                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                    >
+                                        Recipient Address
+                                    </label>
+                                    <input
+                                        id="address"
+                                        name="address"
+                                        type="text"
+                                        required
+                                        placeholder="0x..."
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="amount"
+                                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                    >
+                                        Amount (USDC)
+                                    </label>
+                                    <input
+                                        id="amount"
+                                        name="amount"
+                                        type="text"
+                                        required
+                                        placeholder="0.00"
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+                                >
+                                    Send USDC
+                                </button>
+                                {txnHash !== "" && (
+                                    <div className="mt-4 p-3 bg-green-100 dark:bg-green-800 rounded-md">
+                                        <span className="text-sm text-green-800 dark:text-green-200">
+                                            Transaction Hash:{" "}
+                                            {formatAddress(txnHash)}
+                                        </span>
+                                    </div>
+                                )}
+                            </form>
+                        )}
+
+                        <button
                             onClick={closeModal}
-                            className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            className="w-full px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 mt-4"
                         >
                             Close
                         </button>
