@@ -29,10 +29,15 @@ export default function GroupList() {
     }, []);
     return (
         <>
-            <h2>Groups</h2>
+            <h2 className="text-xl font-bold mb-3">Groups</h2>
             {groups.map((group, index) => (
-                <div key={group}>
-                    <button onClick={() => handleClick(index)}>{group}</button>
+                <div key={group} className="mb-1">
+                    <button
+                        onClick={() => handleClick(index)}
+                        className="w-full px-3 py-1.5 text-left bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md shadow-sm transition duration-200 ease-in-out transform hover:scale-102 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:ring-opacity-50"
+                    >
+                        {group}
+                    </button>
                 </div>
             ))}
         </>
