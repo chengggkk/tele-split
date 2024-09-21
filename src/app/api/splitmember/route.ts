@@ -15,7 +15,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { split_id, split_member, amount } = body;
+    const { split_id, split_member, amount, state} = body;
+
+    console.log("Received body:", body);  // Add logging to check what is received
+
 
     try {
         await dbConnect();
@@ -24,7 +27,8 @@ export async function POST(req: Request) {
         const res = await splitmember.create({
             split_id,
             split_member,
-            amount
+            amount,
+            state
         });
         return new Response(JSON.stringify(res));
     } catch (error) {

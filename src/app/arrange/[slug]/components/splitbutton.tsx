@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from '../styles/splitbutton.module.css';
 import WebApp from "@twa-dev/sdk";
 
@@ -8,14 +8,14 @@ function SplitButton({ params }: { params: { slug: string } }) {
     const [selected, setSelected] = useState<string[]>([]);
     const [amounts, setAmounts] = useState<{ [key: string]: string }>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [splitNote, setSplitNote] = useState(''); 
-    const [amount, setAmount] = useState('');      
+    const [splitNote, setSplitNote] = useState('');
+    const [amount, setAmount] = useState('');
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [activeForm, setActiveForm] = useState<'average' | 'customize'>('average');
     const ID = WebApp.initDataUnsafe.user?.id || 'Unknown ID';
 
     const openModal = () => {
-        setSuccessMessage(null);  
+        setSuccessMessage(null);
         setIsModalOpen(true);
     };
 
@@ -23,12 +23,12 @@ function SplitButton({ params }: { params: { slug: string } }) {
 
     const handleSplitNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSplitNote(e.target.value);
-        setSuccessMessage(null);  
+        setSuccessMessage(null);
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(e.target.value);
-        setSuccessMessage(null);  
+        setSuccessMessage(null);
     };
 
     const handleSubmit = async () => {
@@ -49,31 +49,32 @@ function SplitButton({ params }: { params: { slug: string } }) {
             const result = await response.json();
 
             // Handle both "average" and "customize" split
-        selected.forEach(async (member) => {
-            let memberAmount = 0;
+            selected.forEach(async (member) => {
+                let memberAmount = 0;
 
-            if (activeForm === 'average') {
-                // Calculate average amount for each selected member
-                memberAmount = Number(amount) / selected.length;
-            } else if (activeForm === 'customize') {
-                // Get custom amount for each member
-                memberAmount = amounts[member] ? Number(amounts[member]) : 0;
-            }
+                if (activeForm === 'average') {
+                    // Calculate average amount for each selected member
+                    memberAmount = Number(amount) / selected.length;
+                } else if (activeForm === 'customize') {
+                    // Get custom amount for each member
+                    memberAmount = amounts[member] ? Number(amounts[member]) : 0;
+                }
 
-            // Post each split member and amount
-            await fetch('/api/splitmember', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    split_id: result._id,
-                    split_member: member,
-                    amount: memberAmount,
-                }),
+                // Post each split member and amount
+                await fetch('/api/splitmember', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        split_id: result._id,
+                        split_member: member,
+                        amount: memberAmount,
+                        state: String(member) === String(ID) ? 2 : 0
+                    }),
+                });
             });
-        });
-    
+
 
             setSuccessMessage('Form submitted successfully!');
             closeModal();
@@ -82,7 +83,23 @@ function SplitButton({ params }: { params: { slug: string } }) {
         }
     };
 
-    const allOptions = ["Option 1", "Option 2", "Option 3", "Option 4"];
+    const [groupName, setGroupName] = useState<string[]>([]);
+    const [groupUsers, setGroupUsers] = useState<any[]>([]);
+    const getGroupUsers = async () => {
+        const res = await fetch(`/api/groupmember?groupID=${params.slug}`);
+        const data = await res.json();
+        const users = [];
+        const names = [];
+        for (const user of data) {
+            names.push(user.firstName + " " + user.lastName)
+            users.push(user.userID);
+        }
+        setGroupUsers(users);
+        setGroupName(names);
+    };
+    useEffect(() => {
+        getGroupUsers();
+    }, []);
 
     const handleCheckboxChange = (option: string) => {
         setSelected((prevSelected) => {
@@ -92,7 +109,7 @@ function SplitButton({ params }: { params: { slug: string } }) {
             if (!prevSelected.includes(option)) {
                 setAmounts((prevAmounts) => ({
                     ...prevAmounts,
-                    [option]: '', 
+                    [option]: '',
                 }));
             } else {
                 const { [option]: removed, ...rest } = amounts;
@@ -151,31 +168,32 @@ function SplitButton({ params }: { params: { slug: string } }) {
                                     <div className={styles.checkboxContainer}>
                                         <div className={styles.left}>
                                             <h3>All Options</h3>
-                                            {allOptions.map((option) => (
-                                                <div key={option}>
+                                            {groupUsers.map((id, index) => (
+                                                <div key={id}>
                                                     <input
                                                         type="checkbox"
-                                                        id={option}
-                                                        value={option}
-                                                        checked={selected.includes(option)}
-                                                        onChange={() => handleCheckboxChange(option)}
+                                                        id={id}
+                                                        value={groupName[index]}
+                                                        checked={selected.includes(id)}
+                                                        onChange={() => handleCheckboxChange(id)}
                                                     />
-                                                    <label htmlFor={option}>{option}</label>
+                                                    <label htmlFor={id}>{groupName[index]}</label>
                                                 </div>
                                             ))}
                                         </div>
                                         <div className={styles.right}>
                                             <h3>Selected Options</h3>
                                             <ul>
-                                                {selected.map((option) => (
-                                                    <li key={option}>{option}</li>
-                                                ))}
+                                                {selected.map((option) => {
+                                                    const index = groupUsers.findIndex((name) => name === option);
+                                                    return <li key={option}>{groupName[index]}</li>
+                                                })}
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex justify-end">
+                                <div className="flex justify-end mt-4">
                                     <button
                                         className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
                                         onClick={closeModal}
@@ -205,25 +223,25 @@ function SplitButton({ params }: { params: { slug: string } }) {
                                     <div className={styles.checkboxContainer}>
                                         <div className={styles.left}>
                                             <h3>All Options</h3>
-                                            {allOptions.map((option) => (
-                                                <div key={option}>
+                                            {groupUsers.map((id, index) => (
+                                                <div key={id}>
                                                     <input
                                                         type="checkbox"
-                                                        id={option}
-                                                        value={option}
-                                                        checked={selected.includes(option)}
-                                                        onChange={() => handleCheckboxChange(option)}
+                                                        id={id}
+                                                        value={groupName[index]}
+                                                        checked={selected.includes(id)}
+                                                        onChange={() => handleCheckboxChange(id)}
                                                     />
-                                                    <label htmlFor={option}>{option}</label>
-                                                </div>
+                                                    <label htmlFor={id}>{groupName[index]}</label>
+                                                    </div>
                                             ))}
                                         </div>
                                         <div className={styles.right}>
                                             <h3>Selected Options</h3>
                                             <ul>
-                                                {selected.map((option) => (
-                                                    <li key={option}>
-                                                        {option}
+                                            {selected.map((option) => {
+                                                    const index = groupUsers.findIndex((name) => name === option);
+                                                    return <li key={option}>{groupName[index]}
                                                         <input
                                                             type="text"
                                                             value={amounts[option] || ''}
@@ -232,7 +250,8 @@ function SplitButton({ params }: { params: { slug: string } }) {
                                                             className="border p-2 rounded w-full mb-4"
                                                         />
                                                     </li>
-                                                ))}
+                                                }
+                                                )}
                                             </ul>
                                         </div>
                                     </div>

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import SplitButton from "./components/splitbutton";
 import GroupUsers from "@/app/components/GroupUsers";
+import ShowSplit from "./components/showsplit";
 
 const TelegramUser = dynamic(() => import("../../components/TelegramUser"), {
     ssr: false,
@@ -51,6 +52,7 @@ export default function Home({ params }: { params: { slug: string } }) {
                 <GroupUsers params={params} />
                 <ShareButton params={params} />
                 <SplitButton params={params} />
+                <ShowSplit params={params} />
             </main>
         </div>
     );

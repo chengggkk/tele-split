@@ -13,6 +13,10 @@ const splitmemberSchema = new mongoose.Schema({
     amount: {
         type: Number,
         required: true
+    },
+    state: {
+        type: Number,
+        required: true
     }
 });
 
