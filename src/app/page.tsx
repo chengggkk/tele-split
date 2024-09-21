@@ -5,9 +5,9 @@ import Wallet from "./components/Wallet";
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
 
-import TelegramWallet from "./components/TelegramWallet";
-import { useEffect, useState } from "react";
-
+const TelegramWallet = dynamic(() => import("./components/TelegramWallet"), {
+    ssr: false,
+});
 const TelegramUser = dynamic(() => import("./components/TelegramUser"), {
     ssr: false,
 });

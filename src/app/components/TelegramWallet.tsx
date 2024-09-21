@@ -92,6 +92,7 @@ export default function TelegramWallet() {
     const [mnemonicCopySuccess, setMnemonicCopySuccess] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState<any>(mainnet);
     const [isLoading, setIsLoading] = useState(false);
+    const [biometricInited, setBiometricInited] = useState(false);
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -126,23 +127,39 @@ export default function TelegramWallet() {
     }
 
     function showMnemonic() {
-        WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
-            if (error) {
-                setMnemonic(JSON.stringify(error));
+        const biometricManager = WebApp.BiometricManager;
+        if (!biometricManager.isInited) {
+            alert("Biometric not initialized yet!");
+            return;
+        }
+
+        biometricManager.authenticate(
+            { reason: "The bot requests biometrics for testing purposes." },
+            (success) => {
+                if (success) {
+                    WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
+                        if (error) {
+                            setMnemonic(JSON.stringify(error));
+                        }
+                        if (result) {
+                            setMnemonic(result);
+                        } else {
+                            const mnemonic = generateMnemonic(english);
+                            const account = mnemonicToAccount(mnemonic);
+                            WebApp.CloudStorage.setItem("mnemonic", mnemonic);
+                            setMessage(account.address);
+                        }
+                    });
+                } else {
+                    console.log("Authentication failed");
+                }
             }
-            if (result) {
-                setMnemonic(result);
-            } else {
-                const mnemonic = generateMnemonic(english);
-                const account = mnemonicToAccount(mnemonic);
-                WebApp.CloudStorage.setItem("mnemonic", mnemonic);
-                setMessage(account.address);
-            }
-        });
+        );
     }
 
     useEffect(() => {
         getAccount();
+        biometricInit();
     }, [selectedNetwork]);
 
     function formatAddress(addr: string) {
@@ -160,6 +177,18 @@ export default function TelegramWallet() {
         } catch (err) {
             setCopySuccess("Failed to copy");
         }
+    };
+
+    // Biometric Initialization
+    const biometricInit = () => {
+        const biometricManager = WebApp.BiometricManager;
+        if (!biometricInited) {
+            WebApp.onEvent("biometricManagerUpdated" as any, () => {
+                setBiometricInited(biometricManager.isInited);
+            });
+        }
+
+        biometricManager.init();
     };
 
     const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
