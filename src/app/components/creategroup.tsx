@@ -36,13 +36,16 @@ const TourComponent = () => {
         throw new Error('Failed to save the tour.');
       }
 
-      const result = await response.json();
-      console.log("Tour saved successfully: ", result);
+    const result = await response.json();
+    console.log("Tour saved successfully: ", result);
 
-      // Show success message
-      setSuccessMessage('Tour created successfully!');
-      setTourName('');  // Clear input field
-      closeModal();     // Optionally close the modal on success
+    // Show success message
+    setSuccessMessage('Tour created successfully!');
+    setTourName('');  // Clear input field
+
+    // Direct to arrange page
+    window.location.href = '/arrange/' + result._id; // Use the _id from the response
+    closeModal();     // Optionally close the modal on success
     } catch (error) {
       console.error('Error saving tour: ', error);
 

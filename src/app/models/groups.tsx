@@ -8,6 +8,6 @@ const groupSchema = new mongoose.Schema({
     }
 });
 
-const group = mongoose.model('group', groupSchema);
+const group = mongoose.models.group || mongoose.model('group', groupSchema);
 
 export default group; // Ensure this line is present to export the userlink model as default
