@@ -65,7 +65,7 @@ const Wallet = () => (
         }}
     >
         <DynamicWidget />
-        <Pay />
+        {/* <Pay /> */}
     </DynamicContextProvider>
 );
 

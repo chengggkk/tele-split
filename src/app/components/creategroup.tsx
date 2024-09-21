@@ -117,7 +117,7 @@ const TourComponent = () => {
         <div>
             {/* Button to open modal */}
             <button
-                className="rounded-full bg-black/[.08] dark:bg-white/[.06] px-2 py-1"
+                className="border rounded-md bg-blue-500 text-white px-4 py-2 hover:bg-blue-600 transition duration-300"
                 onClick={openModal}
             >
                 Create Tour
@@ -138,25 +138,25 @@ const TourComponent = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                        <h2 className="text-lg font-bold mb-4">Create Tour</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-2xl max-w-md w-full mx-6 transform transition-transform duration-300 ease-in-out scale-100 hover:scale-105">
+                        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">Create Tour</h2>
                         <input
                             type="text"
                             value={tourName}
                             onChange={handleTourNameChange}
                             placeholder="Enter tour name"
-                            className="border p-2 rounded w-full mb-4"
+                            className="border p-3 rounded-lg w-full mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                         />
-                        <div className="flex justify-end">
+                        <div className="flex justify-end space-x-4">
                             <button
-                                className="mr-2 bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded"
+                                className="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition duration-300 text-gray-800 dark:text-gray-200"
                                 onClick={closeModal}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="bg-blue-500 text-white px-3 py-1 rounded"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
                                 onClick={handleSubmit}
                             >
                                 Save

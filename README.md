@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tele-Split
 
-## Getting Started
+![Tele-Split](./cover.png)
 
-First, run the development server:
+## Description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Tele-Split is a **Telegram bot** that allows you to split bills with your friends. It is built with the Telegram Web App and uses the blockchain to enable transactions.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Telegram bots are becoming increasingly popular, now extending support to the TON ecosystem. However, there's a growing demand for EVM-based features in Telegram web apps and games. With a Telegram bot, we can easily build online stores, games, and enable seamless in-app payments using an EVM wallet. This functionality supports not just B2C models, but also C2C social interactions.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+An example of this is TeleSplit, inspired by [_Splitwise_](https://www.splitwise.com/). When people travel together, they often need to track shared expenses, but Splitwise only records debts and doesn't facilitate payments. This creates difficulty in tracking finances and settling debts automatically.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+TeleSplit addresses these issues by:
 
-## Learn More
+1. Exploring a C2C business model using Telegram bots.
+2. Completing the Splitwise functionality by allowing users to track debts and pay each other easily within the app.
 
-To learn more about Next.js, take a look at the following resources:
+## Run the project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clone the repository
+2. Run `npm install`
+3. Create a `.env` file with the following variables:
+    - `MONGODB_URI`: a MongoDB URI
+4. Run `npm run dev`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technologies used
 
-## Deploy on Vercel
+-   [**Dynamic wallet**](https://www.dynamic.xyz/): a wallet component to connect to other wallets and also use web2 oauth to login
+-   [**Telegram Web App SDK**](https://core.telegram.org/bots/webapps): A telegram web app SDK to interact with the telegram API
+-   [**Circle**](https://www.circle.com/en/): Mock USDC for spliting bills, it can be extended to real USDC
+-   [**AirDAO**](https://airdao.io/): A L1 blockchain to deploy mock USDC ERC20 token
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-   In-app cloud storage for the user's mnemonic and private key
+-   In-app biometric authentication to protect the user's private key
+-   Plug-in component to connect to other wallets
+-   Create groups with your friends
+-   Invite your friends within Telegram
+-   Send USDC to other users
+-   Receive USDC from other users
+-   Split bills with your friends
