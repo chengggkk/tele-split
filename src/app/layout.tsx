@@ -34,9 +34,9 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <Web3ModalProvider initialState={initialState}>
-                    {children}
-                </Web3ModalProvider>
+                {/* <Web3ModalProvider initialState={initialState}> */}
+                {children}
+                {/* </Web3ModalProvider> */}
             </body>
         </html>
     );
