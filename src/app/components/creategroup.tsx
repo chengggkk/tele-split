@@ -9,6 +9,10 @@ const TourComponent = () => {
     const [tourName, setTourName] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null); // State to show success/failure message
     const id = WebApp.initDataUnsafe.user?.id || "Unknown ID";
+    const userName = WebApp.initDataUnsafe.user?.username || "Unknown Username";
+    const firstName = WebApp.initDataUnsafe.user?.first_name || "Unknown First Name";
+    const lastName = WebApp.initDataUnsafe.user?.last_name || "Unknown Last Name";
+    const photoUrl = WebApp.initDataUnsafe.user?.photo_url || "Unknown Photo URL";
     const [address, setAddress] = useState<string | null>(null);
 
     const openModal = () => {
@@ -35,6 +39,10 @@ const TourComponent = () => {
                 groupID: groupID, // Use the _id from the response
                 userID: id, // Ensure this is defined in your scope
                 address: address,
+                userName: userName,
+                firstName: firstName,
+                lastName: lastName,
+                photoUrl: photoUrl,
             }),
         });
 

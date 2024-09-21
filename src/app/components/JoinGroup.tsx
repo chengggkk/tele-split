@@ -5,6 +5,10 @@ import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
 
 export default function JoinGroup() {
     const id = WebApp.initDataUnsafe.user?.id || "Unknown ID";
+    const userName = WebApp.initDataUnsafe.user?.username || "Unknown Username";
+    const firstName = WebApp.initDataUnsafe.user?.first_name || "Unknown First Name";
+    const lastName = WebApp.initDataUnsafe.user?.last_name || "Unknown Last Name";
+    const photoUrl = WebApp.initDataUnsafe.user?.photo_url || "Unknown Photo URL";
     const [groupID, setGroupID] = useState("");
 
     const createGroup = async (groupID: string, address: string) => {
@@ -18,6 +22,10 @@ export default function JoinGroup() {
                 groupID: groupID, // Use the _id from the response
                 userID: id, // Ensure this is defined in your scope
                 address: address,
+                userName: userName,
+                firstName: firstName,
+                lastName: lastName,
+                photoUrl: photoUrl,
             }),
         });
 
