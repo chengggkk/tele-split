@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { Payer, Note, groupID } = body;
+    const { Payer,name, Note, groupID } = body;
 
     try {
         await dbConnect();
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
 
         const res = await split.create({
             Payer,
+            name,
             Note,
             groupID
         });

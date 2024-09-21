@@ -40,6 +40,7 @@ function SplitButton({ params }: { params: { slug: string } }) {
                 },
                 body: JSON.stringify({
                     Payer: ID,
+                    name: WebApp.initDataUnsafe.user?.first_name + " " + WebApp.initDataUnsafe.user?.last_name,
                     Note: splitNote,
                     groupID: slug,
                 }),
@@ -70,7 +71,8 @@ function SplitButton({ params }: { params: { slug: string } }) {
                         split_id: result._id,
                         split_member: member,
                         amount: memberAmount,
-                        state: String(member) === String(ID) ? 2 : 0
+                        state: String(member) === String(ID) ? 2 : 0,
+                        name: groupName[groupUsers.indexOf(member)],
                     }),
                 });
             });

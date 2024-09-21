@@ -17,7 +17,11 @@ const splitmemberSchema = new mongoose.Schema({
     state: {
         type: Number,
         required: true
-    }
+    },
+    name: {
+        type: String,
+        required: true
+    },
 });
 
 const splitmember = mongoose.models.splitmember || mongoose.model('splitmember', splitmemberSchema);

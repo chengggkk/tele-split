@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Key } from "react";
 import WebApp from "@twa-dev/sdk";
 
 function ShowSplit({ params }: { params: { slug: string } }) {
     const { slug } = params;
-    const [result, setResult] = useState<any[]>([]);  // Expecting an array of split data
+    const [result, setResult] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
     const ID = WebApp.initDataUnsafe.user?.id || "Unknown ID";
 
@@ -22,7 +22,6 @@ function ShowSplit({ params }: { params: { slug: string } }) {
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
                     throw new Error(`No result`);
                 }
 
@@ -30,61 +29,74 @@ function ShowSplit({ params }: { params: { slug: string } }) {
                 setResult(result);
             } catch (error: any) {
                 console.error('Error fetching split:', error);
-                setError(error.message);  // <-- Update error state
+                setError(error.message);
             }
         };
 
         fetchData();
     }, [ID, slug]);
 
+    const renderTableBody = (isReceivable: boolean) => {
+        return result.map((splitEntry: any) => (
+            splitEntry.splitMembers
+                .filter((member: { split_member: string | number; }) => 
+                    (isReceivable ? member.split_member !== String(ID) && splitEntry.payer === String(ID) 
+                                  : member.split_member === String(ID) && splitEntry.payer !== String(ID))
+                )
+                .map((member: { _id: Key | null | undefined; name: string; amount: number; state: number }) => (
+                    <tr key={member._id}>
+                        <td className="border px-4 py-2">
+                            {true ? member.name : splitEntry.name}
+                        </td>
+                        <td className="border px-4 py-2">{member.amount}</td>
+                        <td className="border px-4 py-2">
+                            {member.state === 0 ? "unpaid" : member.state === 1 ? "paid" : "payer"}
+                        </td>
+                        {member.state === 0 && (
+                            <td className="border px-4 py-2">
+                                <button>Pay</button>
+                            </td>
+                        )}
+                    </tr>
+                ))
+        ));
+    };
+
     return (
         <div>
             {error && <p>{error}</p>}
-            {result.length > 0 ? (
-                <div>
-                    {result.map((splitEntry: any, index: number) => (
-                        <div key={index} style={{ marginBottom: "20px" }}>
-                            <h3>Payer: {splitEntry.payer}</h3>
-                            <table className="min-w-full bg-white border text-black">
-                                <thead>
-                                    <tr>
-                                        <th className="py-2 border">Split Member</th>
-                                        <th className="py-2 border">Amount</th>
-                                        <th className="py-2 border">State</th>
-                                        <th className="py-2 border">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {splitEntry.splitMembers.map((member: any) => (
-                                        <tr key={member._id}>
-                                            <td className="border px-4 py-2">{member.split_member}</td>
-                                            <td className="border px-4 py-2">{member.amount}</td>
-                                            <td className="border px-4 py-2">
-                                                {member.state === 0
-                                                    ? "unpaid"
-                                                    : member.state === 1
-                                                        ? "paid"
-                                                        : "payer"}
-                                            </td>
-                                            {member.state === 0 && member.split_member === ID && (
-                                                <td className="border px-4 py-2">
-                                                    <button>Pay</button>
-                                                </td>
-                                            )}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <>
-                    <p>groupID: {slug}</p>
-                    <p>userID: {ID}</p>
-                    <p>No split data available.</p>
-                </>
-            )}
+            
+            {/* Receivable Table */}
+            <h2>Receivable Table</h2>
+            <table className="min-w-full bg-white border text-black">
+                <thead>
+                    <tr>
+                        <th className="py-2 border">Split Member</th>
+                        <th className="py-2 border">Amount</th>
+                        <th className="py-2 border">State</th>
+                        <th className="py-2 border">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {renderTableBody(true)}
+                </tbody>
+            </table>
+
+            {/* Payable Table */}
+            <h2>Payable Table</h2>
+            <table className="min-w-full bg-white border text-black">
+                <thead>
+                    <tr>
+                        <th className="py-2 border">Payer</th>
+                        <th className="py-2 border">Amount</th>
+                        <th className="py-2 border">State</th>
+                        <th className="py-2 border">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {renderTableBody(false)}
+                </tbody>
+            </table>
         </div>
     );
 }

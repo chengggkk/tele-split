@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     const body = await req.json();
-    const { split_id, split_member, amount, state} = body;
+    const { split_id, split_member, amount, state, name} = body;
 
     console.log("Received body:", body);  // Add logging to check what is received
 
@@ -28,7 +28,8 @@ export async function POST(req: Request) {
             split_id,
             split_member,
             amount,
-            state
+            state,
+            name
         });
         return new Response(JSON.stringify(res));
     } catch (error) {
