@@ -2,14 +2,15 @@
 import { createWalletClient, http, parseEther } from "viem";
 import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
 import { mainnet } from "viem/chains";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
 
 export default function TelegramWallet() {
     const [txnHash, setTxnHash] = useState("");
     const [message, setMessage] = useState("");
+    const [mnemonic, setMnemonic] = useState("");
 
-    async function getAccount() {
+    function getAccount() {
         WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
             if (error) {
                 setMessage(JSON.stringify(error));
@@ -29,6 +30,26 @@ export default function TelegramWallet() {
         });
     }
 
+    function showMnemonic() {
+        WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
+            if (error) {
+                setMnemonic(JSON.stringify(error));
+            }
+            if (result) {
+                setMnemonic(result);
+            } else {
+                const mnemonic = generateMnemonic(english);
+                const account = mnemonicToAccount(mnemonic);
+                WebApp.CloudStorage.setItem("mnemonic", mnemonic);
+                setMessage(account.address);
+            }
+        });
+    }
+
+    useEffect(() => {
+        getAccount();
+    }, []);
+
     const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
         event.preventDefault();
 
@@ -37,7 +58,7 @@ export default function TelegramWallet() {
         const address = formData.get("address") as string;
         const amount = formData.get("amount") as string;
 
-        const account = await getAccount();
+        const account = getAccount();
 
         const client = createWalletClient({
             chain: mainnet,
@@ -54,7 +75,9 @@ export default function TelegramWallet() {
     return (
         <div>
             <div>Address: {message}</div>
-            <form onSubmit={async (event) => await onSubmit(event)}>
+            <button onClick={showMnemonic}>Show mnemonic</button>
+            <code>{mnemonic}</code>
+            {/* <form onSubmit={async (event) => await onSubmit(event)}>
                 <p>Send to ETH address</p>
                 <input
                     name="address"
@@ -67,7 +90,7 @@ export default function TelegramWallet() {
                 <span data-testid="transaction-section-result-hash">
                     {txnHash}
                 </span>
-            </form>
+            </form> */}
         </div>
     );
 }
