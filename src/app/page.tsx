@@ -1,63 +1,27 @@
-"use client";
 import Image from "next/image";
 import Wallet from "./components/Wallet";
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
 
-import TourComponent from "./components/creategroup";
 import TelegramWallet from "./components/TelegramWallet";
 import { useEffect, useState } from "react";
-import WebApp from "@twa-dev/sdk";
 
 const TelegramUser = dynamic(() => import("./components/TelegramUser"), {
     ssr: false,
 });
-// const ShareButton = dynamic(() => import("./components/ShareButton"), {
-//     ssr: false,
-// });
+const JoinGroup = dynamic(() => import("./components/JoinGroup"), {
+    ssr: false,
+});
+const TourComponent = dynamic(() => import("./components/creategroup"), {
+    ssr: false,
+});
 export default function Home() {
-    useEffect(() => {
-        const fetchData = async () => {
-            // TODO: get user params from db
-            const id = WebApp.initDataUnsafe?.user?.id || "undefined";
-            const param = WebApp.initDataUnsafe?.start_param || "undefined";
-            if (id !== "undefined" && param !== "undefined") {
-                const member_res = await fetch("/api/groupmember", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        // groupname: tourName,
-                        groupID: param, // Use the _id from the response
-                        userID: id, // Ensure this is defined in your scope
-                    }),
-                });
-
-                if (!member_res.ok) {
-                    const errorData = await member_res.json(); // Get error details
-                    console.error("Failed to save member:", errorData);
-                    throw new Error("Failed to save the member.");
-                } else {
-                    const memberData = await member_res.json();
-                    console.log("Member saved successfully: ", memberData);
-                    console.log({
-                        groupID: param,
-                        userID: id,
-                    });
-                }
-                window.location.href = "/arrange/" + param;
-            }
-        };
-
-        fetchData();
-    }, []);
     return (
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
                 <Wallet />
                 <TelegramWallet />
-
+                <JoinGroup />
                 {/* <TelegramUser /> */}
                 {/* <ShareButton /> */}
                 <TourComponent />

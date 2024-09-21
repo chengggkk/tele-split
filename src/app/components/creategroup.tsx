@@ -11,25 +11,6 @@ const TourComponent = () => {
     const id = WebApp.initDataUnsafe.user?.id || "Unknown ID";
     const [address, setAddress] = useState<string | null>(null);
 
-    function getAccount() {
-        WebApp.CloudStorage.getItem("mnemonic", (error, result) => {
-            if (error) {
-                return null;
-            }
-            if (result) {
-                const account = mnemonicToAccount(result);
-                setAddress(account.address);
-                return account;
-            } else {
-                const mnemonic = generateMnemonic(english);
-                const account = mnemonicToAccount(mnemonic);
-                WebApp.CloudStorage.setItem("mnemonic", mnemonic);
-                setAddress(account.address);
-                return account;
-            }
-        });
-    }
-
     const openModal = () => {
         setSuccessMessage(null); // Clear any previous messages when opening the modal
         setIsModalOpen(true);
@@ -41,6 +22,35 @@ const TourComponent = () => {
     }) => {
         setTourName(e.target.value);
         setSuccessMessage(null); // Clear any messages when input changes
+    };
+
+    const createGroup = async (groupID: string, address: string) => {
+        const member_res = await fetch("/api/groupmember", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                groupname: tourName,
+                groupID: groupID, // Use the _id from the response
+                userID: id, // Ensure this is defined in your scope
+                address: address,
+            }),
+        });
+
+        if (!member_res.ok) {
+            const errorData = await member_res.json(); // Get error details
+            console.error("Failed to save member:", errorData);
+            throw new Error("Failed to save the member.");
+        } else {
+            const memberData = await member_res.json();
+            console.log("Member saved successfully: ", memberData);
+            console.log({
+                groupname: tourName,
+                groupID: groupID,
+                userID: id,
+            });
+        }
     };
 
     // Function to handle form submission and send the tour data to the backend
@@ -61,45 +71,32 @@ const TourComponent = () => {
                 throw new Error("Failed to save the tour.");
             }
 
-            const result = await response.json();
-            console.log("Tour saved successfully: ", result);
+            const resultJson = await response.json();
+            console.log("Tour saved successfully: ", resultJson);
 
             // Show success message
             setSuccessMessage("Tour created successfully!");
             setTourName(""); // Clear input field
 
-            getAccount();
-            const member_res = await fetch("/api/groupmember", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    groupname: tourName,
-                    groupID: result._id, // Use the _id from the response
-                    userID: id, // Ensure this is defined in your scope
-                    address: address,
-                }),
+            WebApp.CloudStorage.getItem("mnemonic", async (error, result) => {
+                if (error) {
+                    return null;
+                }
+                let address = null;
+                if (result) {
+                    const account = mnemonicToAccount(result);
+                    address = account.address;
+                } else {
+                    const mnemonic = generateMnemonic(english);
+                    const account = mnemonicToAccount(mnemonic);
+                    WebApp.CloudStorage.setItem("mnemonic", mnemonic);
+                    address = account.address;
+                }
+                await createGroup(resultJson._id, address);
+                // Direct to arrange page
+                window.location.href = "/arrange/" + resultJson._id; // Use the _id from the response
+                closeModal(); // Optionally close the modal on success
             });
-            console.log(member_res);
-
-            if (!member_res.ok) {
-                const errorData = await member_res.json(); // Get error details
-                console.error("Failed to save member:", errorData);
-                throw new Error("Failed to save the member.");
-            } else {
-                const memberData = await member_res.json();
-                console.log("Member saved successfully: ", memberData);
-                console.log({
-                    groupname: tourName,
-                    groupID: result._id,
-                    userID: id,
-                });
-            }
-
-            // Direct to arrange page
-            window.location.href = "/arrange/" + result._id; // Use the _id from the response
-            closeModal(); // Optionally close the modal on success
         } catch (error) {
             console.error("Error saving tour: ", error);
 
