@@ -12,6 +12,9 @@ const TelegramUser = dynamic(() => import("./components/TelegramUser"), {
 const JoinGroup = dynamic(() => import("./components/JoinGroup"), {
     ssr: false,
 });
+const GroupList = dynamic(() => import("./components/GroupList"), {
+    ssr: false,
+});
 const TourComponent = dynamic(() => import("./components/creategroup"), {
     ssr: false,
 });
@@ -22,9 +25,11 @@ export default function Home() {
                 <Wallet />
                 <TelegramWallet />
                 <JoinGroup />
+                <TourComponent />
+                <GroupList />
                 {/* <TelegramUser /> */}
                 {/* <ShareButton /> */}
-                <TourComponent />
+                
                 {/* <Image
           className="dark:invert"
           src="https://nextjs.org/icons/next.svg"
