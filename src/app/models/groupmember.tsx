@@ -1,21 +1,26 @@
-
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const groupmemberSchema = new mongoose.Schema({
     groupname: {
         type: String,
-        required: true
+        required: true,
     },
     groupID: {
         type: String,
-        required: true
+        required: true,
     },
     userID: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
+    address: {
+        type: String,
+        required: true,
+    },
 });
 
-const groupmember = mongoose.models.group || mongoose.model('groupmember', groupmemberSchema);
+const groupmember =
+    mongoose.models.groupmember ||
+    mongoose.model("groupmember", groupmemberSchema);
 
 export default groupmember; // Ensure this line is present to export the userlink model as default
