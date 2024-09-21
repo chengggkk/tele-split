@@ -42,7 +42,7 @@ export default function Home({ params }: { params: { slug: string } }) {
         </div>
         <TelegramUser />
         <ShareButton params={params}/>
-        <SplitButton />
+        <SplitButton params={params}/>
       </main>
     </div>
   );

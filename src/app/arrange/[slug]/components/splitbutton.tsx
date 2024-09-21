@@ -1,56 +1,105 @@
 import { useState } from 'react';
 import styles from '../styles/splitbutton.module.css';
-import { text } from 'stream/consumers';
+import WebApp from "@twa-dev/sdk";
 
-const SplitButton = () => {
+function SplitButton({ params }: { params: { slug: string } }) {
+    const { slug } = params;
+    const [startParams, setStartParams] = useState<string>("undefined");
+    const [selected, setSelected] = useState<string[]>([]);
+    const [amounts, setAmounts] = useState<{ [key: string]: string }>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [tourName, setTourName] = useState('');  // State for "average" form
-    const [splitName, setSplitName] = useState(''); // State for "customize" form
-    const [amount, setAmount] = useState('');      // State for "customize" form
+    const [splitNote, setSplitNote] = useState(''); 
+    const [amount, setAmount] = useState('');      
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [activeForm, setActiveForm] = useState<'average' | 'customize'>('average');
+    const ID = WebApp.initDataUnsafe.user?.id || 'Unknown ID';
 
     const openModal = () => {
-        setSuccessMessage(null);  // Clear any previous messages when opening the modal
+        setSuccessMessage(null);  
         setIsModalOpen(true);
     };
 
     const closeModal = () => setIsModalOpen(false);
 
-    // Handlers for input changes
-    const handleTourNameChange = (e: { target: { value: string } }) => {
-        setTourName(e.target.value);
-        setSuccessMessage(null);  // Clear any messages when input changes
+    const handleSplitNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSplitNote(e.target.value);
+        setSuccessMessage(null);  
     };
 
-    const handleSplitNameChange = (e: { target: { value: string } }) => {
-        setSplitName(e.target.value);
-        setSuccessMessage(null);  // Clear any messages when input changes
-    };
-
-    const handleAmountChange = (e: { target: { value: string } }) => {
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(e.target.value);
-        setSuccessMessage(null);  // Clear any messages when input changes
+        setSuccessMessage(null);  
     };
 
-    const handleSubmit = () => {
-        // Handle form submission logic based on active form
-        if (activeForm === 'average') {
-            console.log(`Tour Name: ${tourName}`);
-        } else if (activeForm === 'customize') {
-            console.log(`Split Name: ${splitName}, Amount: ${amount}`);
+    const handleSubmit = async () => {
+        try {
+            const response: Response = await fetch('/api/split', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    Payer: ID,
+                    Note: splitNote,
+                    groupID: slug,
+                }),
+            });
+
+            if (!response.ok) throw new Error('Failed to save the split.');
+            const result = await response.json();
+
+            // Handle both "average" and "customize" split
+        selected.forEach(async (member) => {
+            let memberAmount = 0;
+
+            if (activeForm === 'average') {
+                // Calculate average amount for each selected member
+                memberAmount = Number(amount) / selected.length;
+            } else if (activeForm === 'customize') {
+                // Get custom amount for each member
+                memberAmount = amounts[member] ? Number(amounts[member]) : 0;
+            }
+
+            // Post each split member and amount
+            await fetch('/api/splitmember', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    split_id: result._id,
+                    split_member: member,
+                    amount: memberAmount,
+                }),
+            });
+        });
+    
+
+            setSuccessMessage('Form submitted successfully!');
+            closeModal();
+        } catch (error) {
+            console.error(error);
         }
-        setSuccessMessage('Form submitted successfully!');
     };
-    const [selected, setSelected] = useState<string[]>([]);
+
     const allOptions = ["Option 1", "Option 2", "Option 3", "Option 4"];
 
     const handleCheckboxChange = (option: string) => {
-        setSelected((prevSelected) =>
-            prevSelected.includes(option)
+        setSelected((prevSelected) => {
+            const newSelected = prevSelected.includes(option)
                 ? prevSelected.filter((item) => item !== option)
-                : [...prevSelected, option]
-        );
+                : [...prevSelected, option];
+            if (!prevSelected.includes(option)) {
+                setAmounts((prevAmounts) => ({
+                    ...prevAmounts,
+                    [option]: '', 
+                }));
+            } else {
+                const { [option]: removed, ...rest } = amounts;
+                setAmounts(rest);
+            }
+            return newSelected;
+        });
     };
 
     return (
@@ -64,7 +113,7 @@ const SplitButton = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg" style={{ width: '90%' }}>
                         <h2 className="text-lg font-bold mb-4">Create Split</h2>
                         <div className="flex justify-between mb-4">
                             <button
@@ -81,22 +130,21 @@ const SplitButton = () => {
                             </button>
                         </div>
 
-                        {/* Form for "average" */}
                         {activeForm === 'average' && (
                             <div>
                                 <input
                                     type="text"
-                                    value={splitName}
-                                    onChange={handleSplitNameChange}
-                                    placeholder="Enter split name"
-                                    className="border p-2 rounded w-full mb-4"
+                                    value={splitNote}
+                                    onChange={handleSplitNoteChange}
+                                    placeholder="Enter split note"
+                                    className="border p-2 rounded w-full mb-4 text-black"
                                 />
                                 <input
                                     type="text"
                                     value={amount}
                                     onChange={handleAmountChange}
                                     placeholder="Enter amount"
-                                    className="border p-2 rounded w-full mb-4"
+                                    className="border p-2 rounded w-full mb-4 text-black"
                                 />
 
                                 <div className={styles.container}>
@@ -144,52 +192,48 @@ const SplitButton = () => {
                             </div>
                         )}
 
-                        {/* Form for "customize" */}
                         {activeForm === 'customize' && (
                             <div>
                                 <input
                                     type="text"
-                                    value={splitName}
-                                    onChange={handleSplitNameChange}
-                                    placeholder="Enter split name"
-                                    className="border p-2 rounded w-full mb-4"
+                                    value={splitNote}
+                                    onChange={handleSplitNoteChange}
+                                    placeholder="Enter split note"
+                                    className="border p-2 rounded w-full mb-4 text-black"
                                 />
-                                <div>
-
-
-                                    <div className={styles.container}>
-                                        <div className={styles.checkboxContainer}>
-                                            <div className={styles.left}>
-                                                <h3>All Options</h3>
-                                                {allOptions.map((option) => (
-                                                    <div key={option}>
+                                <div className={styles.container}>
+                                    <div className={styles.checkboxContainer}>
+                                        <div className={styles.left}>
+                                            <h3>All Options</h3>
+                                            {allOptions.map((option) => (
+                                                <div key={option}>
+                                                    <input
+                                                        type="checkbox"
+                                                        id={option}
+                                                        value={option}
+                                                        checked={selected.includes(option)}
+                                                        onChange={() => handleCheckboxChange(option)}
+                                                    />
+                                                    <label htmlFor={option}>{option}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className={styles.right}>
+                                            <h3>Selected Options</h3>
+                                            <ul>
+                                                {selected.map((option) => (
+                                                    <li key={option}>
+                                                        {option}
                                                         <input
-                                                            type="checkbox"
-                                                            id={option}
-                                                            value={option}
-                                                            checked={selected.includes(option)}
-                                                            onChange={() => handleCheckboxChange(option)}
+                                                            type="text"
+                                                            value={amounts[option] || ''}
+                                                            onChange={(e) => setAmounts({ ...amounts, [option]: e.target.value })}
+                                                            placeholder="Enter amount"
+                                                            className="border p-2 rounded w-full mb-4"
                                                         />
-                                                        <label htmlFor={option}>{option}</label>
-                                                    </div>
+                                                    </li>
                                                 ))}
-                                            </div>
-                                            <div className={styles.right}>
-                                                <h3>Selected Options</h3>
-                                                <ul>
-                                                    {selected.map((option) => (
-                                                        <li key={option}>{option} <input 
-                                                        type="text"
-                                                        value={amount}
-                                                        onChange={handleAmountChange}
-                                                        placeholder="Enter amount"
-                                                        className="border p-2 rounded w-full mb-4"
-                                                        />
-                                                        </li>
-
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -214,6 +258,6 @@ const SplitButton = () => {
             )}
         </>
     );
-};
+}
 
 export default SplitButton;
