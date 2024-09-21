@@ -10,7 +10,7 @@ import {
     parseUnits,
 } from "viem";
 import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
-import { mainnet, sepolia, goerli } from "viem/chains";
+import { mainnet, sepolia, goerli, linea, lineaSepolia } from "viem/chains";
 import { defineChain } from "viem/utils";
 import { FormEventHandler, useEffect, useState } from "react";
 import WebApp from "@twa-dev/sdk";
@@ -19,6 +19,7 @@ const USDC_ADDRESS = {
     Ethereum: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     Sepolia: "0xd3f43c3cf86237ba743d24ceda0e56079364a431", // mock USDC on sepolia
     "AirDAO testnet": "0x92EA66615Ba256cb073D27193efb524a1F880Be9",
+    "Linea Sepolia Testnet": "0x37b31cA71Bb33B149F56b6674486E5eD4365E9AF",
 };
 
 // ABI for the transfer function of ERC-20 tokens (including USDC)
@@ -106,6 +107,7 @@ const networks: { [key: string]: Chain } = {
     Mainnet: mainnet,
     Sepolia: sepolia,
     AirDAOTestnet: AirDAOTestnet,
+    LineaSepolia: lineaSepolia,
     // AirDAO: AirDAO,
 };
 

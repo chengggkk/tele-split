@@ -6,6 +6,15 @@
 
 Tele-Split is a **Telegram bot** that allows you to split bills with your friends. It is built with the Telegram Web App and uses the blockchain to enable transactions.
 
+Telegram bots are becoming increasingly popular, now extending support to the TON ecosystem. However, there's a growing demand for EVM-based features in Telegram web apps and games. With a Telegram bot, we can easily build online stores, games, and enable seamless in-app payments using an EVM wallet. This functionality supports not just B2C models, but also C2C social interactions.
+
+An example of this is TeleSplit, inspired by [_Splitwise_](https://www.splitwise.com/). When people travel together, they often need to track shared expenses, but Splitwise only records debts and doesn't facilitate payments. This creates difficulty in tracking finances and settling debts automatically.
+
+TeleSplit addresses these issues by:
+
+1. Exploring a C2C business model using Telegram bots.
+2. Completing the Splitwise functionality by allowing users to track debts and pay each other easily within the app.
+
 ## Run the project
 
 1. Clone the repository
