@@ -1,11 +1,15 @@
 "use client";
 
 import { SetStateAction, useState } from 'react';
+import WebApp from "@twa-dev/sdk";
+
 
 const TourComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tourName, setTourName] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);  // State to show success/failure message
+  const id = WebApp.initDataUnsafe.user?.id || 'Unknown ID';
+
 
   const openModal = () => {
     setSuccessMessage(null);  // Clear any previous messages when opening the modal
@@ -36,13 +40,43 @@ const TourComponent = () => {
         throw new Error('Failed to save the tour.');
       }
 
-      const result = await response.json();
-      console.log("Tour saved successfully: ", result);
+    const result = await response.json();
+    console.log("Tour saved successfully: ", result);
 
-      // Show success message
-      setSuccessMessage('Tour created successfully!');
-      setTourName('');  // Clear input field
-      closeModal();     // Optionally close the modal on success
+    // Show success message
+    setSuccessMessage('Tour created successfully!');
+    setTourName('');  // Clear input field
+
+    const member_res = await fetch('/api/groupmember', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            groupname: tourName,
+            groupID: result._id,  // Use the _id from the response
+            userID: id,           // Ensure this is defined in your scope
+        }),
+    });
+    console.log(member_res);
+
+    if (!member_res.ok) {
+        const errorData = await member_res.json(); // Get error details
+        console.error('Failed to save member:', errorData);
+        throw new Error('Failed to save the member.');
+    } else {
+        const memberData = await member_res.json();
+        console.log("Member saved successfully: ", memberData);
+        console.log({
+            groupname: tourName,
+            groupID: result._id,
+            userID: id,
+        });
+    }
+
+    // Direct to arrange page
+    // window.location.href = '/arrange/' + result._id; // Use the _id from the response
+    closeModal();     // Optionally close the modal on success
     } catch (error) {
       console.error('Error saving tour: ', error);
 

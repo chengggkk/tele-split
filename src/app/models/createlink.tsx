@@ -1,4 +1,5 @@
 
+import { group } from 'console';
 import mongoose from 'mongoose';
 
 const sharelinkSchema = new mongoose.Schema({
@@ -7,6 +8,10 @@ const sharelinkSchema = new mongoose.Schema({
         required: true
     },
     sharelink: {
+        type: String,
+        required: true
+    },
+    groupID: {
         type: String,
         required: true
     },

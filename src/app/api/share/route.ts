@@ -1,5 +1,5 @@
 import dbConnect from "../../lib/dbconnect";
-import group from "../../models/groups";
+import group from "../../models/createlink";
 
 export async function GET() {
     try {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         console.log("Connected to MongoDB");
 
         const res = await group.create({ groupname });
-        return new Response(JSON.stringify({ _id: res._id, groupname: res.groupname }), { status: 200 });
+        return new Response(JSON.stringify(res));
     } catch (error) {
         return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 });
     }
