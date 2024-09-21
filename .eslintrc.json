@@ -1,6 +1,8 @@
 {
     "extends": ["next/core-web-vitals", "next/typescript"],
     "rules": {
-        "no-var": "off" // Disables the `no-var` rule
+        "no-var": "off", // Disables the `no-var` rule
+        "@typescript-eslint/no-explicit-any": "off", // Allows the use of 'any' type
+        "@typescript-eslint/no-unused-vars": "off"
     }
 }
