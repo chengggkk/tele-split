@@ -151,8 +151,8 @@ function SplitButton({ params }: { params: { slug: string } }) {
             </button>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl mx-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl mx-4 z-50">
                         <h2 className="text-lg font-bold mb-4 text-center">
                             Create Split
                         </h2>
