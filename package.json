@@ -16,6 +16,7 @@
     "@web3modal/wagmi": "^5.1.9",
     "mongoose": "^8.6.3",
     "next": "14.2.13",
+    "node-telegram-bot-api": "^0.66.0",
     "react": "^18",
     "react-dom": "^18",
     "wagmi": "^2.12.12"
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/mongoose": "^5.11.96",
     "@types/node": "^20",
+    "@types/node-telegram-bot-api": "^0.64.7",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
