@@ -279,7 +279,7 @@ function ShowSplit({ params }: { params: { slug: string } }) {
                                     ? "paid"
                                     : "payer"}
                             </td>
-                            {member.state === 0 && (
+                            {member.state === 0 && !isReceivable && (
                                 <td className="border px-4 py-2">
                                     <button
                                         onClick={() =>
