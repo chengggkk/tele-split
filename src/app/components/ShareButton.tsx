@@ -10,7 +10,7 @@ const ShareButton = ({ params }: { params: { slug: string } }) => {
     // }, []);
     const generateShareUrl = () => {
         const userParams = params.slug;
-        const url = `https://t.me/ETHGlobal_singapore_bot/TestWebApp?startapp%3D${userParams}`;
+        const url = `https://t.me/Tele_split_bot/TeleSplit?startapp%3D${userParams}`;
         const text = `Join tele-split with ${WebApp.initDataUnsafe.user?.first_name} ${WebApp.initDataUnsafe.user?.last_name}`;
         const format = `https://t.me/share/url?url=${url}&text=${text}`;
         return format;

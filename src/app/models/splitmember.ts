@@ -13,7 +13,15 @@ const splitmemberSchema = new mongoose.Schema({
     amount: {
         type: Number,
         required: true
-    }
+    },
+    state: {
+        type: Number,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
 });
 
 const splitmember = mongoose.models.splitmember || mongoose.model('splitmember', splitmemberSchema);

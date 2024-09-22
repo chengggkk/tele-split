@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import SplitButton from "./components/splitbutton";
 import GroupUsers from "@/app/components/GroupUsers";
+import ShowSplit from "./components/showsplit";
 
 const TelegramUser = dynamic(() => import("../../components/TelegramUser"), {
     ssr: false,
@@ -40,17 +41,17 @@ export default function Home({ params }: { params: { slug: string } }) {
 
     return (
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-gray-50 dark:bg-gray-900 transition-all duration-300">
-            <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-3xl bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-all duration-300">
+            <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-3xl bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg transition-all duration-300">
                 <button
                     onClick={() => (window.location.href = "/")}
-                    className="absolute top-4 left-4 flex items-center px-4 py-2 bg-black text-white rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 transition duration-150 ease-in-out"
+                    className="absolute top-4 left-4 flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 transition duration-150 ease-in-out"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                        className="w-5 h-5 mr-2"
+                        className="w-5 h-5 mr-2 max-w-full"
                     >
                         <path
                             strokeLinecap="round"
@@ -71,6 +72,7 @@ export default function Home({ params }: { params: { slug: string } }) {
                 <GroupUsers params={params} />
                 <ShareButton params={params} />
                 <SplitButton params={params} />
+                <ShowSplit params={params} />
             </main>
         </div>
     );
